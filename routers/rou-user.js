@@ -6,7 +6,7 @@ router.get('/login', controller.login_get);
 
 router.post('/login', controller.login_post);
 
-router.get('/profile', controller.profile_get);
+router.get('/profile', mid_auth.authenticate, controller.profile_get);
 
 router.post('/logout', controller.logout_post);
 

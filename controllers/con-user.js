@@ -1,28 +1,67 @@
+const User = require('../models/mod-user')
+const jwt = require('jsonwebtoken')
 
-const login_get = (req, res) => {
-    console.log('Login get call.')
+const profile_get = async (req, res) => 
+{
+    console.info('reached profile, rendering')
+    try {
+        console.log(req.auth)
+        const user = await User.findById(req.auth.id)
+        res.render('profile', { title: `Profile - ${user.username}`, user})
+        return
+    } catch (error) {
+        console.error('Error fetching user profile:', error)
+        res.status(500).send('Internal Server Error')
+        return
+    }
+}
+const logout_post = (req, res) => 
+{
+    console.info('logout request, logging out')
+    res.clearCookie('accessToken')
+    res.redirect('/')
+}
+
+const login_get = (req, res) => 
+{
+    console.info('login request')
+    
+    // logic?
     res.render('login', { title: "Log in" })
 }
+const login_post = async (req, res) => 
+{
+    console.info('login submit')
+    
+    // logic?
 
-const login_post = (req, res) => {
-    console.log('Login post call unfinished, rerouting...')
-    res.redirect('/profile')
-}
+    const {username, password} = req.body
+    console.info(`Login attempt for user: ${username}`)
+    try {
+        const user = await User.findOne({username})
+        if (!user || user.password !== password) 
+        {
+            console.warn('Invalid username or password')
+            res.redirect('/login')
+        }
+        else
+        {
+            const token = jwt.sign({id: user._id}, 'your_jwt_secret', {expiresIn: '15m'})
+            res.cookie('accessToken', token, {httpOnly: true, sameSite: 'strict'})
+            console.log('login complete')
+            res.redirect('/profile')
+        }
+    } catch (error) {
+        console.error('Error during login:', error)
+        res.redirect('/login')
+        return
+    }
 
-const profile_get = (req, res) => {
-    console.log('Profile get call. (unfinished, loading placeholder)')
-    const user = { username: "Johndoe", password: "Jojojojoj123" }
-    res.render('profile', { title: `Profile - ${user.username}`, user })
-}
-
-const logout_post = (req, res) => {
-    console.log('Login post call unfinished, rerouting...')
-    res.redirect('/profile')
 }
 
 module.exports = {
+    profile_get,
     login_get,
     login_post,
-    profile_get,
     logout_post
 }

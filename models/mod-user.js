@@ -18,9 +18,13 @@ const userSchema = new Schema({
 })
 
 userSchema.pre('save', async function () {
-    if (!this.isModified('passwordhash')) return
-    
+    if (!this.isModified('password')) return
+    this.password = await argon2.hash(this.password)
 })
 
-const User = mongoose.model('User', userSchema)
+userSchema.methods.verifyPassword = function (pw) {
+    return argon2.verify(this.password, pw)
+}
+
+const User = mongoose.model('User', userSchema, 'users')
 module.exports = User

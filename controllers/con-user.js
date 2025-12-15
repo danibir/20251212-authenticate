@@ -39,17 +39,18 @@ const login_post = async (req, res) =>
     console.info(`Login attempt for user: ${username}`)
     try {
         const user = await User.findOne({username})
-        if (!user || user.password !== password) 
-        {
-            console.warn('Invalid username or password')
-            res.redirect('/login')
-        }
-        else
+        const ok = await user.verifyPassword(password)
+        if (user && ok)
         {
             const token = jwt.sign({id: user._id}, 'your_jwt_secret', {expiresIn: '15m'})
             res.cookie('accessToken', token, {httpOnly: true, sameSite: 'strict'})
             console.log('login complete')
             res.redirect('/profile')
+        }
+        else
+        {
+            console.warn('Invalid username or password')
+            res.redirect('/login')
         }
     } catch (error) {
         console.error('Error during login:', error)

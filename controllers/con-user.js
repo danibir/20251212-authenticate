@@ -41,7 +41,8 @@ const login_post = async (req, res) =>
     try 
     {
         const user = await User.findOne({username})
-        if (user && user.password === password) 
+        const ok = await user.verifyPassword(password)
+        if (user && ok) 
         {
             req.session.user = {username: user.username}
             res.redirect('/profile')

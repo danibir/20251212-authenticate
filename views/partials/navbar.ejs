@@ -1,6 +1,10 @@
 
 <nav>
-    <ul>
+    <ul class="navbar
+    <%if(typeof user !== 'undefined' && user !== null){}else{%>
+     navvar
+    <%}%>
+    ">
         <li><a href="/">Home</a></li>
         <li><a href="/profile">Profile</a></li>
         <% if(typeof user !== 'undefined' && user !== null) { %>
